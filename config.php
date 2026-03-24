@@ -1,18 +1,22 @@
 <?php
-
 // Database configuration
 $host = 'localhost';
-$db   = 'your_database_name';
-$user = 'your_username';
-$pass = 'your_password';
+$db = 'database_name';
+$user = 'username';
+$pass = 'password';
 
-// Create a connection
-$conn = new mysqli($host, $user, $pass, $db);
-
-// Check connection
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
+try {
+    // PDO connection
+    $dsn = "mysql:host=$host;dbname=$db;charset=utf8mb4";
+    $options = [
+        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+        PDO::ATTR_EMULATE_PREPARES => false,
+    ];
+    $pdo = new PDO($dsn, $user, $pass, $options);
+} catch (PDOException $e) {
+    // Better error handling
+    error_log($e->getMessage()); // log the error
+    echo "Database connection failed. Please try again later.";
+    exit;
 }
-
-// Code comments to help you understand the configuration.
-?>
