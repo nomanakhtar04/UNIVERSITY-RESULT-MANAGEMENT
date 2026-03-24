@@ -1,42 +1,28 @@
 <?php
 session_start();
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+// Include database connection
+include('db_connection.php');
+
+// Check if form is submitted
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = $_POST['username'];
     $password = $_POST['password'];
 
-    // Dummy user authentication for demonstration
-    $valid_username = 'student';
-    $valid_password = 'password';
+    // Prepare SQL statement to prevent SQL injection
+    $stmt = $conn->prepare('SELECT student_id FROM students WHERE username = ? AND password = ?');
+    $stmt->bind_param('ss', $username, $password);
+    $stmt->execute();
+    $result = $stmt->get_result();
 
-    if ($username === $valid_username && $password === $valid_password) {
-        $_SESSION['username'] = $username;
+    // Check if a record is found
+    if ($result->num_rows > 0) {
+        $row = $result->fetch_assoc();
+        $_SESSION['student_id'] = $row['student_id']; // Set student_id in session
         header('Location: dashboard.php');
-        exit;
+        exit();
     } else {
-        $error = 'Invalid username or password!';
+        echo 'Invalid username or password';
     }
 }
 ?>
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Login</title>
-</head>
-<body>
-    <h2>Student Login</h2>
-    <form method="POST" action="">
-        <label for="username">Username:</label>
-        <input type="text" id="username" name="username" required><br><br>
-
-        <label for="password">Password:</label>
-        <input type="password" id="password" name="password" required><br><br>
-
-        <input type="submit" value="Login"><br><br>
-        <?php if (isset($error)) echo '<p style="color:red;">' . $error . '</p>'; ?>
-    </form>
-</body>
-</html>
